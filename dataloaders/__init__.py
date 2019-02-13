@@ -4,9 +4,9 @@ from torch.utils.data import DataLoader
 
 def make_data_loader(args, **kwargs):
 
-    train_set = pano_360_txt.Pano_360_txt(args.data_base_dir, args.train_meta)
+    train_set = pano_360_txt.Pano_360_txt(args.data_base_dir, args.train_meta, augmentation=True)
     if args.valid_meta:
-        valid_set = pano_360_txt.Pano_360_txt(args.data_base_dir, args.valid_meta)
+        valid_set = pano_360_txt.Pano_360_txt(args.data_base_dir, args.valid_meta, augmentation=False)
     else:
         valid_set = None
 

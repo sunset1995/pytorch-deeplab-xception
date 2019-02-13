@@ -9,12 +9,13 @@ from torch.utils.data import Dataset
 
 class Pano_360_txt(Dataset):
 
-    def __init__(self, base_dir, meta_path):
+    def __init__(self, base_dir, meta_path, augmentation=False):
         txt_path = os.path.join(base_dir, meta_path)
 
         self.base_dir = base_dir
         with open(txt_path) as f:
             self.xy_path = [line.strip().split() for line in f]
+        self.augmentation = augmentation
 
     def __len__(self):
         return len(self.xy_path)
@@ -26,14 +27,15 @@ class Pano_360_txt(Dataset):
         sem = np.array(Image.open(sem_path)) - 1
 
         # Random flip
-        if np.random.randint(2) == 0:
+        if augmentation and np.random.randint(2) == 0:
             rgb = np.flip(rgb, 1)
             sem = np.flip(sem, 1)
 
         # Random rotation
-        shift = np.random.randint(rgb.shape[1])
-        rgb = np.roll(rgb, shift, 1)
-        sem = np.roll(sem, shift, 1)
+        if augmentation:
+            shift = np.random.randint(rgb.shape[1])
+            rgb = np.roll(rgb, shift, 1)
+            sem = np.roll(sem, shift, 1)
 
         # Convert to tensor
         rgb = torch.from_numpy(rgb.astype(np.float32).transpose((2, 0, 1)))
