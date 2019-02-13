@@ -81,6 +81,7 @@ class Trainer(object):
 
     def training(self, epoch):
         train_loss = 0.0
+        n_img = 0
         self.model.train()
         tbar = tqdm(self.train_loader)
         num_img_tr = len(self.train_loader)
@@ -94,8 +95,9 @@ class Trainer(object):
             loss = self.criterion(output, target)
             loss.backward()
             self.optimizer.step()
-            train_loss += loss.item()
-            tbar.set_description('Train loss: %.3f' % (train_loss / (i + 1)))
+            n_img += image.shape[0]
+            train_loss += loss.item() * image.shape[0]
+            tbar.set_description('Train loss: %.3f' % (train_loss / n_img))
             self.writer.add_scalar('train/total_loss_iter', loss.item(), i + num_img_tr * epoch)
 
             # Show 10 * 3 inference results each epoch
@@ -103,9 +105,9 @@ class Trainer(object):
                 global_step = i + num_img_tr * epoch
                 self.summary.visualize_image(self.writer, self.args.dataset, image, target, output, global_step)
 
-        self.writer.add_scalar('train/total_loss_epoch', train_loss, epoch)
-        print('[Epoch: %d, numImages: %5d]' % (epoch, i * self.args.batch_size + image.data.shape[0]))
-        print('Loss: %.3f' % train_loss)
+        self.writer.add_scalar('train/total_loss_epoch', train_loss / n_img, epoch)
+        print('[Epoch: %d, numImages: %5d]' % (epoch, n_img))
+        print('Loss: %.3f' % train_loss / n_img)
 
         # save last checkpoint
         self.saver.save_checkpoint({
@@ -120,6 +122,7 @@ class Trainer(object):
         self.evaluator.reset()
         tbar = tqdm(self.valid_loader, desc='\r')
         test_loss = 0.0
+        n_img = 0
         for i, sample in enumerate(tbar):
             image, target = sample['image'], sample['label']
             if self.args.cuda:
@@ -127,8 +130,9 @@ class Trainer(object):
             with torch.no_grad():
                 output = self.model(image)
             loss = self.criterion(output, target)
-            test_loss += loss.item()
-            tbar.set_description('Test loss: %.3f' % (test_loss / (i + 1)))
+            n_img += image.shape[0]
+            test_loss += loss.item() * image.shape[0]
+            tbar.set_description('Test loss: %.3f' % (test_loss / n_img))
             pred = output.data.cpu().numpy()
             target = target.cpu().numpy()
             pred = np.argmax(pred, axis=1)
@@ -140,7 +144,7 @@ class Trainer(object):
         Acc_class = self.evaluator.Pixel_Accuracy_Class()
         mIoU = self.evaluator.Mean_Intersection_over_Union()
         FWIoU = self.evaluator.Frequency_Weighted_Intersection_over_Union()
-        self.writer.add_scalar('val/total_loss_epoch', test_loss, epoch)
+        self.writer.add_scalar('val/total_loss_epoch', test_loss / n_img, epoch)
         self.writer.add_scalar('val/mIoU', mIoU, epoch)
         self.writer.add_scalar('val/Acc', Acc, epoch)
         self.writer.add_scalar('val/Acc_class', Acc_class, epoch)
@@ -148,7 +152,7 @@ class Trainer(object):
         print('Validation:')
         print('[Epoch: %d, numImages: %5d]' % (epoch, i * self.args.batch_size + image.data.shape[0]))
         print("Acc:{}, Acc_class:{}, mIoU:{}, fwIoU: {}".format(Acc, Acc_class, mIoU, FWIoU))
-        print('Loss: %.3f' % test_loss)
+        print('Loss: %.3f' % (test_loss / n_img))
 
         new_pred = mIoU
         if new_pred > self.best_pred:

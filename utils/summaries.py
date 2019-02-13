@@ -16,8 +16,8 @@ class TensorboardSummary(object):
         rgb = image[:3].clone().cpu().data / 255
         y_ = decode_seg_map_sequence(torch.max(output[:3], 1)[1].detach().cpu().numpy(), dataset=dataset)
         y = decode_seg_map_sequence(torch.squeeze(target[:3], 1).detach().cpu().numpy(), dataset=dataset)
-        rgb_y_ = (rgb + y_) / 2
-        rgb_y = (rgb + y) / 2
+        rgb_y_ = rgb * 0.2 + y_ * 0.8
+        rgb_y = rgb * 0.2 + y * 0.8
 
         grid_image = make_grid(rgb, 3, normalize=False, range=(0, 255))
         writer.add_image('Image', grid_image, global_step)
