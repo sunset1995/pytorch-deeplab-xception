@@ -197,7 +197,7 @@ def main():
                         metavar='N', help='start epochs (default:0)')
     parser.add_argument('--batch-size', type=int, default=None,
                         metavar='N', help='input batch size for \
-                                training (default: auto = 4 * |gpu|)')
+                                training (default: auto = 2 * |gpu|)')
     parser.add_argument('--test-batch-size', type=int, default=1,
                         metavar='N', help='input batch size for \
                                 testing (default: auto)')
@@ -234,8 +234,6 @@ def main():
     # evaluation option
     parser.add_argument('--eval-interval', type=int, default=1,
                         help='evaluuation interval (default: 1)')
-    parser.add_argument('--no-val', action='store_true', default=False,
-                        help='skip validation during training')
 
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -252,7 +250,7 @@ def main():
             args.sync_bn = False
 
     if args.batch_size is None:
-        args.batch_size = 4 * len(args.gpu_ids)
+        args.batch_size = 2 * len(args.gpu_ids)
 
     if args.test_batch_size is None:
         args.test_batch_size = args.batch_size

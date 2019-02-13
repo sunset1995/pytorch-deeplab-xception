@@ -27,12 +27,12 @@ class Pano_360_txt(Dataset):
         sem = np.array(Image.open(sem_path)) - 1
 
         # Random flip
-        if augmentation and np.random.randint(2) == 0:
+        if self.augmentation and np.random.randint(2) == 0:
             rgb = np.flip(rgb, 1)
             sem = np.flip(sem, 1)
 
         # Random rotation
-        if augmentation:
+        if self.augmentation:
             shift = np.random.randint(rgb.shape[1])
             rgb = np.roll(rgb, shift, 1)
             sem = np.roll(sem, shift, 1)
