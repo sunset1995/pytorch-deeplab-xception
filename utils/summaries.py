@@ -1,5 +1,6 @@
 import os
 import torch
+import numpy as np
 from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
 from dataloaders.utils import decode_seg_map_sequence
@@ -7,13 +8,19 @@ from dataloaders.utils import decode_seg_map_sequence
 class TensorboardSummary(object):
     def __init__(self, directory):
         self.directory = directory
+        self.mean = torch.FloatTensor(
+            np.array([0.485, 0.456, 0.406]).reshape(1, 3, 1, 1)
+        ).cuda()
+        self.std = torch.FloatTensor(
+            np.array([0.229, 0.224, 0.225]).reshape(1, 3, 1, 1)
+        ).cuda()
 
     def create_summary(self):
         writer = SummaryWriter(log_dir=os.path.join(self.directory))
         return writer
 
     def visualize_image(self, writer, dataset, image, target, output, global_step):
-        rgb = image[:3].clone().cpu().data / 255
+        rgb = (image[:3] * self.std + self.mean).clone().cpu().data
         y_ = decode_seg_map_sequence(torch.max(output[:3], 1)[1].detach().cpu().numpy(), dataset=dataset)
         y = decode_seg_map_sequence(torch.squeeze(target[:3], 1).detach().cpu().numpy(), dataset=dataset)
         rgb_y_ = rgb * 0.2 + y_ * 0.8

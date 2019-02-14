@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class Pano_360_txt(Dataset):
@@ -16,6 +17,9 @@ class Pano_360_txt(Dataset):
         with open(txt_path) as f:
             self.xy_path = [line.strip().split() for line in f]
         self.augmentation = augmentation
+        self.mean = np.array([0.485, 0.456, 0.406]).reshape(1, 1, 3)
+        self.std = np.array([0.229, 0.224, 0.225]).reshape(1, 1, 3)
+
 
     def __len__(self):
         return len(self.xy_path)
@@ -25,6 +29,9 @@ class Pano_360_txt(Dataset):
         sem_path = os.path.join(self.base_dir, self.xy_path[index][1])
         rgb = np.array(Image.open(rgb_path))[..., :3]
         sem = np.array(Image.open(sem_path)) - 1
+
+        # Normalize rgb
+        rgb = (rgb / 255 - self.mean) / self.std
 
         # Random flip
         if self.augmentation and np.random.randint(2) == 0:

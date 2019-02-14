@@ -44,7 +44,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, output_stride, BatchNorm, pretrained=True):
+    def __init__(self, block, layers, output_stride, BatchNorm, pretrained=None):
         self.inplanes = 64
         super(ResNet, self).__init__()
         blocks = [1, 2, 4]
@@ -72,7 +72,7 @@ class ResNet(nn.Module):
         self._init_weight()
 
         if pretrained:
-            self._load_pretrained_model()
+            self._load_pretrained_model(pretrained)
 
     def _make_layer(self, block, planes, blocks, stride=1, dilation=1, BatchNorm=None):
         downsample = None
@@ -135,8 +135,8 @@ class ResNet(nn.Module):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
-    def _load_pretrained_model(self):
-        pretrain_dict = model_zoo.load_url('https://download.pytorch.org/models/resnet101-5d3b4d8f.pth')
+    def _load_pretrained_model(self, pretrained):
+        pretrain_dict = model_zoo.load_url(pretrained)
         model_dict = {}
         state_dict = self.state_dict()
         for k, v in pretrain_dict.items():
@@ -145,12 +145,22 @@ class ResNet(nn.Module):
         state_dict.update(model_dict)
         self.load_state_dict(state_dict)
 
-def ResNet101(output_stride, BatchNorm, pretrained=True):
+def ResNet101(output_stride, BatchNorm,
+              pretrained='https://download.pytorch.org/models/resnet101-5d3b4d8f.pth'):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], output_stride, BatchNorm, pretrained=pretrained)
+    return model
+
+def ResNet50(output_stride, BatchNorm,
+             pretrained='https://download.pytorch.org/models/resnet50-19c8e357.pth'):
+    """Constructs a ResNet-50 model.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on ImageNet
+    """
+    model = ResNet(Bottleneck, [3, 4, 6, 3], output_stride, BatchNorm, pretrained=pretrained)
     return model
 
 if __name__ == "__main__":

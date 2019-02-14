@@ -107,7 +107,7 @@ class Trainer(object):
 
         self.writer.add_scalar('train/total_loss_epoch', train_loss / n_img, epoch)
         print('[Epoch: %d, numImages: %5d]' % (epoch, n_img))
-        print('Loss: %.3f' % train_loss / n_img)
+        print('Loss: %.3f' % (train_loss / n_img))
 
         # save last checkpoint
         self.saver.save_checkpoint({
@@ -174,8 +174,8 @@ def main():
     parser.add_argument('--dataset', type=str, default='stanford2d3d',
                         choices=['stanford2d3d', 'sumo'])
     parser.add_argument('--num-classes', type=int, default=None)
-    parser.add_argument('--backbone', type=str, default='resnet',
-                        choices=['resnet', 'xception', 'drn', 'mobilenet'],
+    parser.add_argument('--backbone', type=str, default='resnet50',
+                        choices=['resnet50', 'resnet', 'xception', 'drn', 'mobilenet'],
                         help='backbone name (default: resnet)')
     parser.add_argument('--out-stride', type=int, default=16,
                         help='network output stride (default: 16)')
@@ -261,7 +261,7 @@ def main():
 
     if args.epochs is None:
         epoches = {
-            'stanford2d3d': 560,
+            'stanford2d3d': 200,
             'sumo': 10,
         }
         args.epochs = epoches[args.dataset.lower()]
