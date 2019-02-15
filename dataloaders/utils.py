@@ -24,8 +24,12 @@ def decode_segmap(label_mask, dataset, plot=False):
     """
     if dataset == 'stanford2d3d':
         label_colours = get_stanford2d3d_labels()
+    elif dataset == 'mpv3':
+        label_colours = get_mpv3_labels()
     elif dataset == 'sumo':
         label_colours = get_sumo_labels()
+    elif dataset == 'random_room_v5':
+        label_colours = get_random_room_v5_labels()
     else:
         raise NotImplementedError
 
@@ -62,6 +66,35 @@ def encode_segmap(mask):
         label_mask[np.where(np.all(mask == label, axis=-1))[:2]] = ii
     label_mask = label_mask.astype(int)
     return label_mask
+
+
+def get_mpv3_labels():
+    return np.array([
+        [190, 153, 153],
+        [107, 142, 35],
+        [220, 20, 60],
+        [255, 0, 0],
+        [153, 153, 153],
+        [128, 64, 128],
+        [152, 251, 152],
+        [0, 130, 180],
+        [244, 35, 232],
+        [220, 220, 0],
+        [250, 170, 30],
+        [70, 70, 70],
+        [102, 102, 156]])
+
+
+def get_random_room_v5_labels():
+    return np.array([
+        [128, 64, 128],
+        [250, 170, 30],
+        [153, 153, 153],
+        [152, 251, 152],
+        [0, 130, 180],
+        [220, 20, 60],
+        [107, 142, 35],
+        [190, 153, 153]])
 
 
 def get_stanford2d3d_labels():

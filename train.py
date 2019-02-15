@@ -172,7 +172,8 @@ def main():
     parser.add_argument('--train-meta', type=str, default='meta/stanford2d3d_semantic_train.txt')
     parser.add_argument('--valid-meta', type=str, default=None)
     parser.add_argument('--dataset', type=str, default='stanford2d3d',
-                        choices=['stanford2d3d', 'sumo'])
+                        choices=['stanford2d3d', 'mpv3',
+                                 'sumo', 'random_room_v5'])
     parser.add_argument('--num-classes', type=int, default=None)
     parser.add_argument('--backbone', type=str, default='resnet50',
                         choices=['resnet50', 'resnet', 'xception', 'drn', 'mobilenet'],
@@ -254,7 +255,7 @@ def main():
             args.sync_bn = False
 
     if args.batch_size is None:
-        args.batch_size = 2 * len(args.gpu_ids)
+        args.batch_size = 4 * len(args.gpu_ids)
 
     if args.test_batch_size is None:
         args.test_batch_size = args.batch_size
@@ -262,21 +263,27 @@ def main():
     if args.epochs is None:
         epoches = {
             'stanford2d3d': 200,
+            'mpv3': 88,
             'sumo': 10,
+            'random_room_v5': 30,
         }
         args.epochs = epoches[args.dataset.lower()]
 
     if args.lr is None:
         lrs = {
             'stanford2d3d': 0.01,
+            'mpv3': 0.01,
             'sumo': 0.01,
+            'random_room_v5': 0.01,
         }
         args.lr = lrs[args.dataset.lower()] / (4 * len(args.gpu_ids)) * args.batch_size
 
     if args.num_classes is None:
         nc = {
             'stanford2d3d': 13,
+            'mpv3': 13,
             'sumo': 132,
+            'random_room_v5': 8,
         }
         args.num_classes = nc[args.dataset.lower()]
 
